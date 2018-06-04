@@ -1,6 +1,7 @@
 package api
 
-import infrastructure.{Droid, Episode, Human, Character}
+import domain.User
+import infrastructure.{Character, Droid, Episode, Human}
 import sangria.execution.deferred.{Fetcher, HasId}
 import sangria.schema._
 
@@ -25,12 +26,15 @@ class GraphQLSchema {
       EnumValue("NEWHOPE",
         value = Episode.NEWHOPE,
         description = Some("Released in 1977.")),
+
       EnumValue("EMPIRE",
         value = Episode.EMPIRE,
         description = Some("Released in 1980.")),
+
       EnumValue("JEDI",
         value = Episode.JEDI,
-        description = Some("Released in 1983."))))
+        description = Some("Released in 1983.")))
+    )
 
   val Character: InterfaceType[SangriaContext, Character] =
     InterfaceType(
@@ -40,16 +44,34 @@ class GraphQLSchema {
         Field("id", StringType,
           Some("The id of the character."),
           resolve = _.value.id),
+
         Field("name", OptionType(StringType),
           Some("The name of the character."),
           resolve = _.value.name),
+
         Field("friends", ListType(Character),
           Some("The friends of the character, or an empty list if they have none."),
           resolve = ctx => characters.deferSeqOpt(ctx.value.friends)),
+
         Field("appearsIn", OptionType(ListType(OptionType(EpisodeEnum))),
           Some("Which movies they appear in."),
           resolve = _.value.appearsIn map (e => Some(e)))
       ))
+
+  val UserType =
+    ObjectType(
+      "User",
+      "...",
+      fields[SangriaContext, User](
+        Field("email", StringType,
+          resolve = _.value.email
+        ),
+
+        Field("name", StringType,
+          resolve = _.value.name
+        )
+      )
+    )
 
   val Human =
     ObjectType(
@@ -60,15 +82,19 @@ class GraphQLSchema {
         Field("id", StringType,
           Some("The id of the human."),
           resolve = _.value.id),
+
         Field("name", OptionType(StringType),
           Some("The name of the human."),
           resolve = _.value.name),
+
         Field("friends", ListType(Character),
           Some("The friends of the human, or an empty list if they have none."),
           resolve = ctx => characters.deferSeqOpt(ctx.value.friends)),
+
         Field("appearsIn", OptionType(ListType(OptionType(EpisodeEnum))),
           Some("Which movies they appear in."),
           resolve = _.value.appearsIn map (e => Some(e))),
+
         Field("homePlanet", OptionType(StringType),
           Some("The home planet of the human, or null if unknown."),
           resolve = _.value.homePlanet)
@@ -82,15 +108,19 @@ class GraphQLSchema {
       Field("id", StringType,
         Some("The id of the droid."),
         resolve = _.value.id),
+
       Field("name", OptionType(StringType),
         Some("The name of the droid."),
         resolve = ctx => Future.successful(ctx.value.name)),
+
       Field("friends", ListType(Character),
         Some("The friends of the droid, or an empty list if they have none."),
         resolve = ctx => characters.deferSeqOpt(ctx.value.friends)),
+
       Field("appearsIn", OptionType(ListType(OptionType(EpisodeEnum))),
         Some("Which movies they appear in."),
         resolve = _.value.appearsIn map (e => Some(e))),
+
       Field("primaryFunction", OptionType(StringType),
         Some("The primary function of the droid."),
         resolve = _.value.primaryFunction)
@@ -106,19 +136,28 @@ class GraphQLSchema {
 
   val Query = ObjectType(
     "Query", fields[SangriaContext, Unit](
+      Field("user", OptionType(UserType),
+        arguments = ID :: Nil,
+        resolve = ctx => ctx.ctx.getUserDetails(ctx arg ID)
+      ),
+
       Field("hero", Character,
         arguments = EpisodeArg :: Nil,
         deprecationReason = Some("Use `human` or `droid` fields instead"),
         resolve = (ctx) => ctx.ctx.getHero(ctx.arg(EpisodeArg))),
+
       Field("human", OptionType(Human),
         arguments = ID :: Nil,
         resolve = ctx => ctx.ctx.getHuman(ctx arg ID)),
+
       Field("droid", Droid,
         arguments = ID :: Nil,
         resolve = ctx => ctx.ctx.getDroid(ctx arg ID).get),
+
       Field("humans", ListType(Human),
         arguments = LimitArg :: OffsetArg :: Nil,
         resolve = ctx => ctx.ctx.getHumans(ctx arg LimitArg, ctx arg OffsetArg)),
+
       Field("droids", ListType(Droid),
         arguments = LimitArg :: OffsetArg :: Nil,
         resolve = ctx => ctx.ctx.getDroids(ctx arg LimitArg, ctx arg OffsetArg))

@@ -1,8 +1,12 @@
 package api
 
-import infrastructure.{CharacterRepo, Droid, Episode, Human, Character}
+import domain.{User, UserRepository}
+import infrastructure.{Character, CharacterRepo, Droid, Episode, Human}
 
-class SangriaContext(characterRepo: CharacterRepo) {
+import scala.concurrent.Future
+
+class SangriaContext(characterRepo: CharacterRepo,
+                     userRepository: UserRepository) {
 
   def getHumans: (Int, Int) => List[Human] = characterRepo.getHumans
 
@@ -14,4 +18,5 @@ class SangriaContext(characterRepo: CharacterRepo) {
 
   def getDroid: String => Option[Droid] = characterRepo.getDroid
 
- }
+  def getUserDetails: String => Future[Option[User]] = userRepository.getUserDetails
+}

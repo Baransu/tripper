@@ -21,6 +21,9 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-slf4j" % AkkaVersion,
     "com.typesafe.akka" %% "akka-persistence" % AkkaVersion,
 
+    "org.iq80.leveldb"            % "leveldb"          % "0.9"
+    "org.fusesource.leveldbjni"   % "leveldbjni-all"   % "1.8"
+
     "org.sangria-graphql" %% "sangria" % "1.4.0",
     "org.sangria-graphql" %% "sangria-circe" % "1.2.1",
     "org.sangria-graphql" %% "sangria-json4s-native" % "1.0.0",
