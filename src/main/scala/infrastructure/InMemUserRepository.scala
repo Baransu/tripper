@@ -3,11 +3,10 @@ package infrastructure
 import java.util.UUID
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
-import domain.UserCommands._
-import domain.{User, UserActor, UserCommand, UserRepository}
-import infrastructure.InMemUserRepository.ProxyRequest
 import akka.pattern.ask
 import akka.util.Timeout
+import domain.UserCommands._
+import domain.{User, UserActor, UserCommand, UserRepository}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -15,19 +14,19 @@ import scala.reflect.ClassTag
 
 class InMemUserRepository()(implicit system: ActorSystem, ec: ExecutionContext) extends UserRepository {
 
+  import InMemUserRepository._
+
   private implicit val timeout: Timeout = Timeout(20 seconds)
 
   private val proxyActor: ActorRef = system.actorOf(Props(new ProxyActor))
 
   class ProxyActor extends Actor {
     override def receive: Receive = {
-      case ProxyRequest(id, command) => {
-        val user =
-          context
-            .child(id)
-            .getOrElse(context.actorOf(Props(new UserActor(id)), id))
-        user forward command
-      }
+      case ProxyRequest(id, command) =>
+        context
+          .child(id)
+          .getOrElse(context.actorOf(Props(new UserActor(id)), id))
+          .forward(command)
     }
   }
 

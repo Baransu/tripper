@@ -2,14 +2,15 @@ package domain
 
 import java.time.ZonedDateTime
 
+import akka.actor.ActorLogging
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import domain.UserCommands.{CreateUser, Get}
 import domain.UserEvent.{DetailsAssigned, UserCreated}
-import scala.collection.immutable.Seq
 
+import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
 
-class UserActor(id: String)(implicit ec: ExecutionContext) extends PersistentActor {
+class UserActor(id: String)(implicit ec: ExecutionContext) extends PersistentActor with ActorLogging {
   import UserActor._
 
   override def persistenceId: String = id

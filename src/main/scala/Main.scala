@@ -1,13 +1,16 @@
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
+import api.{GraphQLEndpoint, GraphQLSchema, SangriaContext}
+import com.typesafe.config.ConfigFactory
+import infrastructure.{CharacterRepo, InMemUserRepository}
 
 import scala.util.{Failure, Success}
-import infrastructure.{CharacterRepo, InMemUserRepository}
-import api.{GraphQLEndpoint, GraphQLSchema, SangriaContext}
 
 object Main {
-  implicit val system = ActorSystem("tripper-actor-system")
+  private val config = ConfigFactory.load("default.conf")
+
+  implicit val system = ActorSystem("tripper-actor-system", config)
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 

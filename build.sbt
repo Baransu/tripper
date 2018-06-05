@@ -12,7 +12,6 @@ resolvers ++= Seq(
 libraryDependencies ++= {
   val AkkaVersion = "2.5.9"
   val AkkaHttpVersion = "10.0.11"
-  val CirceVersion = "0.9.3"
   val Json4sVersion = "3.5.4"
 
   Seq(
@@ -21,8 +20,8 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-slf4j" % AkkaVersion,
     "com.typesafe.akka" %% "akka-persistence" % AkkaVersion,
 
-    "org.iq80.leveldb"            % "leveldb"          % "0.9"
-    "org.fusesource.leveldbjni"   % "leveldbjni-all"   % "1.8"
+    "org.iq80.leveldb" % "leveldb" % "0.9",
+    "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8",
 
     "org.sangria-graphql" %% "sangria" % "1.4.0",
     "org.sangria-graphql" %% "sangria-circe" % "1.2.1",
