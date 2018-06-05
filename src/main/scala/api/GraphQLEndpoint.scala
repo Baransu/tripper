@@ -5,7 +5,7 @@ import akka.http.scaladsl.server.Directives.{as, complete, entity, path, _}
 import akka.http.scaladsl.server.{Route, StandardRoute}
 import de.heikoseeberger.akkahttpjson4s.Json4sSupport
 import org.json4s.native.Serialization
-import org.json4s.{DefaultFormats, Formats, JObject, JValue, Serialization}
+import org.json4s.{DefaultFormats, Formats, JObject, JString, JValue, Serialization}
 import sangria.execution.{ErrorWithResolver, Executor, QueryAnalysisError}
 import sangria.marshalling.json4s.native._
 import sangria.parser.QueryParser
@@ -19,7 +19,7 @@ class GraphQLEndpoint(graphQLSchema: GraphQLSchema, sangriaContext: SangriaConte
   protected implicit val formats: Formats             = DefaultFormats
   protected implicit val serialization: Serialization = Serialization
 
-  def executeQuery(query: String, variables: JValue): StandardRoute =
+  def executeQuery(query: String, variables: JValue, operationName: Option[String]): StandardRoute =
     QueryParser.parse(query) match {
       case Success(queryAst) =>
         complete (
@@ -28,6 +28,7 @@ class GraphQLEndpoint(graphQLSchema: GraphQLSchema, sangriaContext: SangriaConte
               graphQLSchema.StarWarsSchema,
               queryAst,
               sangriaContext,
+              operationName = operationName,
               variables = variables)
             .map (OK → _)
             .recover {
@@ -44,7 +45,8 @@ class GraphQLEndpoint(graphQLSchema: GraphQLSchema, sangriaContext: SangriaConte
       (body \ "query").extractOpt[String] match {
         case Some(query) =>
           val variables = (body \ "variables").extractOpt[JObject].getOrElse(JObject())
-          executeQuery(query, variables)
+          val operationName = (body \ "operationName").extractOpt[String]
+          executeQuery(query, variables, operationName)
 
         case None => complete(BadRequest)
       }

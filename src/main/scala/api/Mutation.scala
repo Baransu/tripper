@@ -10,6 +10,6 @@ trait Mutation {
   this: SangriaContext =>
 
   @GraphQLField
-  def createUser(name: String, email: String): Future[Option[User]] =
+  def createUser(name: String, email: String): Future[User] =
     createUser(CreateUser(name, email))
 }

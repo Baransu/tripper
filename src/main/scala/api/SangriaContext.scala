@@ -4,10 +4,11 @@ import domain.UserCommands.CreateUser
 import domain.{User, UserRepository}
 import infrastructure.{Character, CharacterRepo, Droid, Episode, Human}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class SangriaContext(characterRepo: CharacterRepo,
-                     userRepository: UserRepository) extends Mutation {
+case class SangriaContext(characterRepo: CharacterRepo,
+                          userRepository: UserRepository)
+                         (implicit ec: ExecutionContext) extends Mutation {
 
   def getHumans: (Int, Int) => List[Human] = characterRepo.getHumans
 
@@ -21,5 +22,5 @@ class SangriaContext(characterRepo: CharacterRepo,
 
   def getUserDetails: String => Future[Option[User]] = userRepository.getUserDetails
 
-  def createUser: CreateUser => Future[Option[User]] = userRepository.createUser
+  def createUser: CreateUser => Future[User] = userRepository.createUser
 }

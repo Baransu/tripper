@@ -36,9 +36,9 @@ class InMemUserRepository()(implicit system: ActorSystem, ec: ExecutionContext) 
   override def getUserDetails(id: String): Future[Option[User]] =
     command[Option[User]](id, Get)
 
-  override def createUser(createCommand: CreateUser): Future[Option[User]] = {
+  override def createUser(createCommand: CreateUser): Future[User] = {
     val id = UUID.randomUUID().toString()
-    command[Option[User]](id, createCommand)
+    command[User](id, createCommand)
   }
 }
 

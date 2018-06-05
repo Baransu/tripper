@@ -3,7 +3,7 @@ package api
 import domain.User
 import infrastructure.{Character, Droid, Episode, Human}
 import sangria.execution.deferred.{Fetcher, HasId}
-import sangria.macros.derive.deriveContextObjectType
+import sangria.macros.derive._
 import sangria.schema._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -59,7 +59,7 @@ class GraphQLSchema()(implicit ex: ExecutionContext) {
           resolve = _.value.appearsIn map (e => Some(e)))
       ))
 
-  val UserType =
+  implicit val UserType =
     ObjectType(
       "User",
       "...",
