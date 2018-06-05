@@ -3,14 +3,15 @@ package api
 import domain.User
 import infrastructure.{Character, Droid, Episode, Human}
 import sangria.execution.deferred.{Fetcher, HasId}
+import sangria.macros.derive.deriveContextObjectType
 import sangria.schema._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * Defines a GraphQL schema for the current project
   */
-class GraphQLSchema {
+class GraphQLSchema()(implicit ex: ExecutionContext) {
   /**
     * Resolves the lists of characters. These resolutions are batched and
     * cached for the duration of a query.
@@ -63,13 +64,9 @@ class GraphQLSchema {
       "User",
       "...",
       fields[SangriaContext, User](
-        Field("email", StringType,
-          resolve = _.value.email
-        ),
-
-        Field("name", StringType,
-          resolve = _.value.name
-        )
+        Field("id", IDType, resolve = _.value.id),
+        Field("name", StringType, resolve = _.value.name),
+        Field("email", StringType, resolve = _.value.email)
       )
     )
 
@@ -163,5 +160,7 @@ class GraphQLSchema {
         resolve = ctx => ctx.ctx.getDroids(ctx arg LimitArg, ctx arg OffsetArg))
     ))
 
-  val StarWarsSchema = Schema(Query)
+  val MutationType = deriveContextObjectType[SangriaContext, Mutation, Unit](identity)
+
+  val StarWarsSchema = Schema(Query, Some(MutationType))
 }

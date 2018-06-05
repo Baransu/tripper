@@ -24,7 +24,6 @@ libraryDependencies ++= {
     "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8",
 
     "org.sangria-graphql" %% "sangria" % "1.4.0",
-    "org.sangria-graphql" %% "sangria-circe" % "1.2.1",
     "org.sangria-graphql" %% "sangria-json4s-native" % "1.0.0",
 
     "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion,

@@ -26,7 +26,7 @@ class UserActor(id: String)(implicit ec: ExecutionContext) extends PersistentAct
         )
       )(handleEvent)
       deferAsync(()) { _ ⇒
-        sender ! id
+        sender ! User(id, name, email)
       }
 
     case _ => sender ! None
@@ -47,7 +47,7 @@ class UserActor(id: String)(implicit ec: ExecutionContext) extends PersistentAct
 
     case DetailsAssigned(name, email, _) => {
       state = state.copy(
-        Some(User(name, email))
+        Some(User(id, name, email))
       )
     }
   }

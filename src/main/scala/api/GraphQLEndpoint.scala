@@ -1,8 +1,7 @@
 package api
 
 import akka.http.scaladsl.model.StatusCodes.{BadRequest, InternalServerError, OK}
-import akka.http.scaladsl.server.Directives.{as, complete, entity, path}
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.{as, complete, entity, path, _}
 import akka.http.scaladsl.server.{Route, StandardRoute}
 import de.heikoseeberger.akkahttpjson4s.Json4sSupport
 import org.json4s.native.Serialization
@@ -29,8 +28,7 @@ class GraphQLEndpoint(graphQLSchema: GraphQLSchema, sangriaContext: SangriaConte
               graphQLSchema.StarWarsSchema,
               queryAst,
               sangriaContext,
-              variables = variables
-            )
+              variables = variables)
             .map (OK → _)
             .recover {
               case error: QueryAnalysisError ⇒ BadRequest → error.resolveError

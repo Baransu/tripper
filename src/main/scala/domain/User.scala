@@ -1,4 +1,4 @@
 package domain
 
-case class User(name: String, email: String)
+case class User(id: String, name: String, email: String)
 
