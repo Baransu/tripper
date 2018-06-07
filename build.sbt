@@ -19,6 +19,9 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
     "com.typesafe.akka" %% "akka-slf4j" % AkkaVersion,
     "com.typesafe.akka" %% "akka-persistence" % AkkaVersion,
+    "com.typesafe.akka" %% "akka-persistence-query" % AkkaVersion,
+
+    "org.reactivemongo" %% "reactivemongo" % "0.12.7",
 
     "org.iq80.leveldb" % "leveldb" % "0.9",
     "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8",
