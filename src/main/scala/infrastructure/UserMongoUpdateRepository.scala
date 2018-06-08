@@ -2,6 +2,7 @@ package infrastructure
 
 import java.util.concurrent.atomic.AtomicBoolean
 
+import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
 import akka.persistence.query.{EventEnvelope, Offset}
 import akka.persistence.query.scaladsl.{CurrentEventsByTagQuery, EventsByTagQuery}
 import akka.stream.ActorMaterializer
@@ -13,7 +14,7 @@ import reactivemongo.bson.BSONDocument
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class UserMongoUpdateRepository(readJurnal: CurrentEventsByTagQuery with EventsByTagQuery,
+class UserMongoUpdateRepository(readJurnal: LeveldbReadJournal,
                                 collection: BSONCollection,
                                 databaseReady: AtomicBoolean
                                )(implicit ec: ExecutionContext, max: ActorMaterializer)

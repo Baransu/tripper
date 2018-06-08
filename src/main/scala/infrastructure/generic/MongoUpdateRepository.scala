@@ -4,6 +4,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicBoolean
 
 import akka.NotUsed
+import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
 
 import scala.util.{Failure, Success}
 import akka.persistence.query.{EventEnvelope, NoOffset, Offset, TimeBasedUUID}
@@ -16,7 +17,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.collection.JavaConverters._
 
 abstract class MongoUpdateRepository(
-                                      readJurnal: CurrentEventsByTagQuery with EventsByTagQuery,
+                                      readJurnal: LeveldbReadJournal,
                                       databaseReady: AtomicBoolean,
                                       name: String)
                                     (implicit ec: ExecutionContext, mat: ActorMaterializer) {

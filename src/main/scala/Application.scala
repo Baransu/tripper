@@ -1,5 +1,5 @@
-import akka.persistence.query.scaladsl.{CurrentEventsByTagQuery, EventsByTagQuery}
+import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
 
 object Application {
-  type Journal = CurrentEventsByTagQuery with EventsByTagQuery
+  type Journal = LeveldbReadJournal
 }

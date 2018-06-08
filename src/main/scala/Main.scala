@@ -3,7 +3,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.persistence.query.{EventEnvelope, Offset}
+import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
+import akka.persistence.query.{EventEnvelope, Offset, PersistenceQuery}
 import akka.persistence.query.scaladsl.{CurrentEventsByTagQuery, EventsByTagQuery}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
@@ -33,11 +34,8 @@ object Main extends App {
   private val connection = MongoConnection.parseURI(mongoUri).map(driver.connection)
   private val db = Await.result(Future.fromTry(connection).flatMap(_.database(databaseName)), 30 seconds)
 
-  private val readJournal = new EventsByTagQuery with CurrentEventsByTagQuery {
-    override def eventsByTag(tag: String, offset: Offset): Source[EventEnvelope, NotUsed] = Source.empty
-
-    override def currentEventsByTag(tag: String, offset: Offset): Source[EventEnvelope, NotUsed] = Source.empty
-  }
+  private val readJournal =
+    PersistenceQuery(system).readJournalFor[LeveldbReadJournal](LeveldbReadJournal.Identifier)
 
   val databaseReady = new AtomicBoolean(false)
   val collection = db.collection[BSONCollection]("users")
