@@ -1,13 +1,10 @@
 import java.util.concurrent.atomic.AtomicBoolean
 
-import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
-import akka.persistence.query.{EventEnvelope, Offset, PersistenceQuery}
-import akka.persistence.query.scaladsl.{CurrentEventsByTagQuery, EventsByTagQuery}
+import akka.persistence.query.PersistenceQuery
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Source
 import api.{GraphQLEndpoint, GraphQLSchema, SangriaContext}
 import com.typesafe.config.ConfigFactory
 import infrastructure.{InMemUserRepository, UserMongoQueryRepository, UserMongoUpdateRepository}
@@ -22,7 +19,7 @@ object Main extends App {
   private val config = ConfigFactory.load("default.conf")
 
   implicit val system = ActorSystem("tripper-actor-system", config)
-  implicit val materializer = ActorMaterializer()
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
   private val mongoHost = config.getString("mongo.host")

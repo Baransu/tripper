@@ -19,10 +19,11 @@ class UserActor(id: String)(implicit ec: ExecutionContext) extends PersistentAct
 
   override def receiveCommand: Receive = {
     case CreateUser(name, email) =>
+      print(persistenceId)
       persistAll(
         Seq(UserCreated(id, name, email, ZonedDateTime.now))
       )(handleEvent)
-      deferAsync(()) { _ ⇒
+      deferAsync(()) { _ =>
         sender ! User(id, name, email)
       }
 

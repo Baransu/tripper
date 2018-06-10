@@ -14,17 +14,18 @@ import reactivemongo.bson.BSONDocument
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class UserMongoUpdateRepository(readJurnal: LeveldbReadJournal,
+class UserMongoUpdateRepository(readJournal: LeveldbReadJournal,
                                 collection: BSONCollection,
                                 databaseReady: AtomicBoolean
-                               )(implicit ec: ExecutionContext, max: ActorMaterializer)
-  extends MongoUpdateRepository(readJurnal, databaseReady, "UserMongoUpdateRepository") {
+                               )(implicit ec: ExecutionContext, mat: ActorMaterializer)
+  extends MongoUpdateRepository(readJournal, databaseReady, "UserMongoUpdateRepository") {
 
   override protected def persistEvents(event: EventEnvelope): Future[Offset] =
     handleEvent(event.event).map(_ => event.offset)
 
   def handleEvent: PartialFunction[Any, Future[Any]] = {
     case UserCreated(id, name, email, _) => {
+      print("Persisting UserCreated")
       collection
         .update(
           BSONDocument("_id" -> id),
@@ -33,10 +34,10 @@ class UserMongoUpdateRepository(readJurnal: LeveldbReadJournal,
     }
   }
 
-  private def setUserFields(id: String, updates: BSONDocument) =
-    updateUser(id, BSONDocument("$set" → updates))
+  //  private def setUserFields(id: String, updates: BSONDocument) =
+  //    updateUser(id, BSONDocument("$set" → updates))
 
-  private def updateUser(id: String, query: BSONDocument) =
-    collection.update(BSONDocument("_id" → id), query)
+  //  private def updateUser(id: String, query: BSONDocument) =
+  //    collection.update(BSONDocument("_id" → id), query)
 
 }

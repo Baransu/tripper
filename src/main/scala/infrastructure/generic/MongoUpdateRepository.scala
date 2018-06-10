@@ -8,7 +8,6 @@ import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
 
 import scala.util.{Failure, Success}
 import akka.persistence.query.{EventEnvelope, NoOffset, Offset, TimeBasedUUID}
-import akka.persistence.query.scaladsl.{CurrentEventsByTagQuery, EventsByTagQuery}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Sink}
 
@@ -16,23 +15,23 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.collection.JavaConverters._
 
-abstract class MongoUpdateRepository(
-                                      readJurnal: LeveldbReadJournal,
-                                      databaseReady: AtomicBoolean,
-                                      name: String)
+abstract class MongoUpdateRepository(readJournal: LeveldbReadJournal,
+                                     databaseReady: AtomicBoolean,
+                                     name: String)
                                     (implicit ec: ExecutionContext, mat: ActorMaterializer) {
 
   private val processingOffsetList = new ConcurrentLinkedQueue[Offset]()
   private var lastProcessedOffset = Offset.noOffset
 
   def readEvents(callback: => Unit) = {
-    readJurnal
+    readJournal
       .currentEventsByTag("all", Offset.noOffset)
-      .via(parallelPersistFlow)
+      .via(persistFlow)
       .map(offset => lastProcessedOffset = offset)
       .runWith(Sink.ignore)
       .onComplete {
         case Success(_) => {
+          println("Old events stream finished. Starting new event stream")
           databaseReady.set(true)
           readNewEvents(getStartOffset)
           callback
@@ -45,10 +44,10 @@ abstract class MongoUpdateRepository(
   }
 
   private def readNewEvents(lastOffset: Offset, delay: FiniteDuration = 0 seconds) = {
-    readJurnal
+    readJournal
       .eventsByTag("all", lastOffset)
       .initialDelay(delay)
-      .via(parallelPersistFlow)
+      .via(persistFlow)
       .runWith(Sink.foreach(_ => databaseReady.set(true)))
       .onComplete {
         case Success(_) => handleStreamStopped()
@@ -73,7 +72,7 @@ abstract class MongoUpdateRepository(
         })
     } else lastProcessedOffset
 
-  private def parallelPersistFlow: Flow[EventEnvelope, Offset, NotUsed] =
+  private def persistFlow: Flow[EventEnvelope, Offset, NotUsed] =
     preProcessingFlow
       .via(processingFlow)
       .via(postProcessingFlow)
