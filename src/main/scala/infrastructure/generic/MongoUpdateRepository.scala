@@ -7,7 +7,7 @@ import akka.NotUsed
 import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
 
 import scala.util.{Failure, Success}
-import akka.persistence.query.{EventEnvelope, NoOffset, Offset, TimeBasedUUID}
+import akka.persistence.query._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Sink}
 
@@ -67,7 +67,7 @@ abstract class MongoUpdateRepository(readJournal: LeveldbReadJournal,
     if (!processingOffsetList.isEmpty) {
       processingOffsetList.asScala.toList.min((x: Offset, y: Offset) =>
         (x, y) match {
-          case (first: TimeBasedUUID, second: TimeBasedUUID) => first.compare(second)
+          case (fst: Sequence, snd: Sequence) => fst.compare(snd)
           case _ => throw new IllegalStateException("Incorrect offset format")
         })
     } else lastProcessedOffset
@@ -89,10 +89,10 @@ abstract class MongoUpdateRepository(readJournal: LeveldbReadJournal,
   private def postProcessingFlow: Flow[Offset, Offset, NotUsed] = Flow[Offset].map { offset =>
     processingOffsetList remove offset
     (offset, lastProcessedOffset) match {
-      case (first: TimeBasedUUID, NoOffset) => lastProcessedOffset = first
-      case (first: TimeBasedUUID, second: TimeBasedUUID) => if (first.compare(second) > 0) lastProcessedOffset = offset
-      case (first, second) =>
-        throw new IllegalStateException(s"Incorrect offset format: first: $first, second: $second")
+      case (fst: Sequence, NoOffset) => lastProcessedOffset = fst
+      case (fst: Sequence, snd: Sequence) => if (fst.compare(snd) > 0) lastProcessedOffset = offset
+      case (fst, snd) =>
+        throw new IllegalStateException(s"Incorrect offset format: first: $fst, second: $snd")
     }
     offset
   }

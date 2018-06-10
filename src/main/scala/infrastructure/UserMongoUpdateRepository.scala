@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
 import akka.persistence.query.{EventEnvelope, Offset}
-import akka.persistence.query.scaladsl.{CurrentEventsByTagQuery, EventsByTagQuery}
 import akka.stream.ActorMaterializer
 import domain.UserEvent.UserCreated
 import infrastructure.MongoWRs.UserDTO
@@ -25,7 +24,7 @@ class UserMongoUpdateRepository(readJournal: LeveldbReadJournal,
 
   def handleEvent: PartialFunction[Any, Future[Any]] = {
     case UserCreated(id, name, email, _) => {
-      print("Persisting UserCreated")
+      println("Persisting UserCreated")
       collection
         .update(
           BSONDocument("_id" -> id),
