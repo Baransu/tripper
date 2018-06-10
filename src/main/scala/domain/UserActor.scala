@@ -5,7 +5,7 @@ import java.time.ZonedDateTime
 import akka.actor.ActorLogging
 import akka.persistence.{PersistentActor, RecoveryCompleted}
 import domain.UserCommands.{CreateUser, Get}
-import domain.UserEvent.{UserCreated}
+import domain.UserEvent.UserCreated
 
 import scala.collection.immutable.Seq
 import scala.concurrent.ExecutionContext
@@ -19,7 +19,6 @@ class UserActor(id: String)(implicit ec: ExecutionContext) extends PersistentAct
 
   override def receiveCommand: Receive = {
     case CreateUser(name, email) =>
-      print(persistenceId)
       persistAll(
         Seq(UserCreated(id, name, email, ZonedDateTime.now))
       )(handleEvent)
@@ -40,12 +39,11 @@ class UserActor(id: String)(implicit ec: ExecutionContext) extends PersistentAct
   }
 
   private def handleEvent: PartialFunction[UserEvent, Unit] = {
-    case UserCreated(id, name, email, _) => {
+    case UserCreated(id, name, email, _) =>
       state = state.copy(
         Some(User(id, name, email))
       )
       context.become(initialized)
-    }
   }
 
 }

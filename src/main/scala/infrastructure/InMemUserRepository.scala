@@ -37,7 +37,7 @@ class InMemUserRepository()(implicit system: ActorSystem, ec: ExecutionContext) 
     command[Option[User]](id, Get)
 
   override def createUser(createCommand: CreateUser): Future[User] = {
-    val id = UUID.randomUUID().toString()
+    val id = UUID.randomUUID().toString
     command[User](id, createCommand)
   }
 }
